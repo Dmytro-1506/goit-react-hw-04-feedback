@@ -1,63 +1,67 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import { Statistics } from './Statistics/Statistics';
 import { FeedbackOptions } from './FeedbackOptions/FeedbackOptions';
 
-export class App extends Component {
-  state = {
-    good: 0,
-    neutral: 0,
-    bad: 0
-  }
-  
-  countTotalFeedback = () => {
-    const { good, neutral, bad } = this.state;
-    return (good+neutral+bad)
-  }
+export function App() {
+  const [good, setGood] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bad, setBad] = useState(0);
 
-  countPositiveFeedbackPercentage = () => {
-    return (this.state.good/this.countTotalFeedback()*100)
-  }
-
-  checkStatistics = () => {
-    const { good, neutral, bad } = this.state;
-    if (this.countTotalFeedback() === 0) {
+  const checkStatistics = () => {
+    const totalFeedback = good + neutral + bad;
+    const positiveFeedbackPercentage = (good / (good + neutral + bad) * 100)
+    if ((good + neutral + bad) === 0) {
       return <Notification message="There is no feedback"></Notification>
     } else {
       return <Statistics
-        good={good} neutral={neutral} bad={bad} total={this.countTotalFeedback()} positivePercentage={this.countPositiveFeedbackPercentage().toFixed(2)}
+        good={good} neutral={neutral} bad={bad} total={totalFeedback} positivePercentage={positiveFeedbackPercentage.toFixed(2)}
       />
     }
   }
 
-  FeedbackCounter = (event) => {
+  const feedbackCounter = (event) => {
     const btnName = event.target.title;
-    this.setState({ [btnName]: this.state[btnName]+1 });
+    switch (btnName) {
+      case 'good': {
+        setGood(good + 1)
+        break
+      }
+      case 'neutral': {
+        setNeutral(neutral + 1)
+        break
+      }
+      case 'bad': {
+        setBad(bad + 1)
+        break
+      }
+      default: {
+        return
+      }
+    }
   }
 
-  render() {
-    return (
-      <div
-        style={{
-          height: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          fontSize: 40,
-          color: '#010101'
-        }}
-      >
-        <Section title="Please leave feedback">
-          <FeedbackOptions
-            options={['good', 'neutral', 'bad']} onLeaveFeedback={this.FeedbackCounter}
-          />
-        </Section>
-        <Section title="Statistics">
-            {this.checkStatistics()}
-        </Section>
-      </div>
-    );
-  }
+  return (
+    <div
+    style={{
+      height: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      fontSize: 40,
+      color: '#010101'
+    }}
+    >
+      <Section title="Please leave feedback">
+        <FeedbackOptions
+          options={['good', 'neutral', 'bad']} onLeaveFeedback={feedbackCounter}
+        />
+      </Section>
+      <Section title="Statistics">
+        {checkStatistics()}
+      </Section>
+    </div>
+  );
 }
 
 const Section = ({ title, children }) => {
